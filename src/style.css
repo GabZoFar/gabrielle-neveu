@@ -303,6 +303,7 @@ section h3 {
 /* Scale wrapper to fit ~20px icons (0.1 scale). 
    We need a wrapper because transform affects layout space differently depending on flow.
    Best to put this on an element inside a flex container. */
+.icon-scaled,
 .linkedin-icon-scaled {
   width: 20px;
   height: 20px;
@@ -312,6 +313,7 @@ section h3 {
   display: inline-block;
 }
 
+.icon-scaled .linkedin-logo-component,
 .linkedin-icon-scaled .linkedin-logo-component {
   transform: scale(0.1);
   transform-origin: top left;
@@ -325,10 +327,22 @@ section h3 {
   background: #1565c0;
   height: 200px;
   width: 200px;
-  border-radius: 20px;
+  border-radius: 40px;
   /* box-shadow: 0 0 30px rgba(0,0,0,0.3); Removed shadow as requested */
   position: relative;
   overflow: hidden;
+}
+
+/* New wrapper to scale the inner content (increase padding) */
+.linkedin-logo-component .linkedin-mark-wrapper {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: scale(0.85);
+  /* Scale down to create more 'padding' */
+  transform-origin: center;
 }
 
 .linkedin-logo-component .linkedin-icon-bg .i {
@@ -380,4 +394,75 @@ section h3 {
   width: 33px;
   bottom: 0;
   left: 30px;
+}
+
+/* Custom Substack Logo Component */
+.substack-logo-component {
+  position: relative;
+  height: 200px;
+  width: 200px;
+}
+
+.substack-logo-component .substack-icon-bg {
+  background: #FF6719;
+  height: 200px;
+  width: 200px;
+  border-radius: 50px;
+  box-shadow: 0 0 30px rgba(255, 103, 25, 0.3);
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  padding: 55px;
+  box-sizing: border-box;
+}
+
+.substack-logo-component .substack-logo {
+  position: relative;
+  width: 100%;
+  height: 120%;
+}
+
+.substack-logo-component .line-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 12px;
+  background: #fff;
+  border-radius: 2px;
+}
+
+.substack-logo-component .line-middle {
+  position: absolute;
+  top: 24px;
+  left: 0;
+  right: 0;
+  height: 12px;
+  background: #fff;
+  border-radius: 2px;
+}
+
+.substack-logo-component .bookmark {
+  position: absolute;
+  top: 48px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #fff;
+  border-radius: 2px;
+  clip-path: polygon(0 0,
+      100% 0,
+      100% 100%,
+      50% 60%,
+      0 100%);
+}
+
+/* Reuse scaling for Substack */
+.icon-scaled .substack-logo-component {
+  transform: scale(0.1);
+  transform-origin: top left;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
