@@ -116,7 +116,7 @@ section h3 {
   text-decoration: underline;
   text-underline-offset: 4px;
   margin-bottom: var(--spacing-sm);
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .bullet-list {
@@ -280,4 +280,104 @@ section h3 {
 
 .social-icons a:hover {
   color: var(--text-primary);
+}
+
+/* GitHub Icon Specific Override */
+.social-icons a[aria-label="GitHub"] {
+  color: var(--text-primary);
+}
+
+
+/* Custom LinkedIn Logo Component */
+.linkedin-logo-component {
+  position: relative;
+  /* Original size was 200px, but we scale it down. 
+     We set dimensions purely for the internal absolute positioning context 
+     (though scale handles visual size). */
+  height: 200px;
+  width: 200px;
+  /* Reset position params from user snippet that centered it on page */
+  /* Remove transform: translate(-50%, -50%); top: 50%; left: 50%; */
+}
+
+/* Scale wrapper to fit ~20px icons (0.1 scale). 
+   We need a wrapper because transform affects layout space differently depending on flow.
+   Best to put this on an element inside a flex container. */
+.linkedin-icon-scaled {
+  width: 20px;
+  height: 20px;
+  position: relative;
+  overflow: visible;
+  /* Allow the scaled element to overflow this tiny box */
+  display: inline-block;
+}
+
+.linkedin-icon-scaled .linkedin-logo-component {
+  transform: scale(0.1);
+  transform-origin: top left;
+  /* Scale from top-left so it stays in the 20x20 box */
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.linkedin-logo-component .linkedin-icon-bg {
+  background: #1565c0;
+  height: 200px;
+  width: 200px;
+  border-radius: 20px;
+  /* box-shadow: 0 0 30px rgba(0,0,0,0.3); Removed shadow as requested */
+  position: relative;
+  overflow: hidden;
+}
+
+.linkedin-logo-component .linkedin-icon-bg .i {
+  position: absolute;
+  height: 90px;
+  width: 30px;
+  background: #fff;
+  bottom: 30px;
+  left: 30px;
+}
+
+.linkedin-logo-component .linkedin-icon-bg .i::after {
+  content: "";
+  position: absolute;
+  background: #fff;
+  height: 36px;
+  width: 36px;
+  border-radius: 50%;
+  bottom: 104px;
+  left: -3px;
+}
+
+.linkedin-logo-component .linkedin-icon-bg .n {
+  position: absolute;
+  height: 90px;
+  width: 30px;
+  background: #fff;
+  bottom: 30px;
+  left: 80px;
+}
+
+.linkedin-logo-component .linkedin-icon-bg .n::before {
+  content: "";
+  position: absolute;
+  background: #fff;
+  border-radius: 5000px 5000px 0 0;
+  height: 90px;
+  width: 67px;
+  bottom: 0;
+  left: 23px;
+}
+
+.linkedin-logo-component .linkedin-icon-bg .n::after {
+  content: "";
+  position: absolute;
+  background: #1565c0;
+  border-radius: 5000px 5000px 0 0;
+  height: 70px;
+  width: 33px;
+  bottom: 0;
+  left: 30px;
 }
