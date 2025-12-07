@@ -1,0 +1,283 @@
+/* Global Layout Adjustments */
+body {
+  padding-top: var(--spacing-lg);
+  padding-bottom: var(--spacing-lg);
+}
+
+/* Header */
+.main-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-xl);
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.profile-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.avatar {
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+}
+
+.name {
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: var(--accent-color);
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-outline {
+  border: 2px solid var(--border-color);
+  background: white;
+  color: var(--text-primary);
+}
+
+.btn-outline:hover {
+  background: #f5f5f5;
+  border-color: #ccc;
+}
+
+.btn-primary {
+  background: #ffffff;
+  /* Let's look at the "Get in touch" button. It has a mail icon (red) and text "Get in touch". Border is grey. */
+  border: 2px solid var(--border-color);
+  color: var(--text-primary);
+  /* The icon inside is red usually */
+}
+
+.btn-primary:hover {
+  background: #f5f5f5;
+  border-color: #ccc;
+}
+
+.btn-primary svg {
+  color: var(--accent-color);
+}
+
+.icon-only {
+  padding: 0.5rem 1rem;
+}
+
+.icon-only svg {
+  color: var(--accent-color);
+}
+
+/* Hero */
+.hero {
+  margin-bottom: var(--spacing-xl);
+}
+
+.hero h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: var(--spacing-xxs);
+  color: var(--text-primary);
+}
+
+.subtitle {
+  font-size: 1.5rem;
+  color: var(--text-secondary);
+  max-width: 600px;
+}
+
+/* Sections General */
+section {
+  margin-bottom: 3rem;
+}
+
+section h3 {
+  font-size: 1rem;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  margin-bottom: var(--spacing-sm);
+  font-weight: 600;
+}
+
+.bullet-list {
+  list-style-type: disc;
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.bullet-list li {
+  margin-bottom: 0.25rem;
+}
+
+/* Lifecycle Section */
+.lifecycle-section {
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  padding: var(--spacing-lg);
+  background: white;
+  /* Or transparent? */
+  margin-top: var(--spacing-xl);
+}
+
+.lifecycle-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+@media (min-width: 768px) {
+  .lifecycle-container {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.roles-title {
+  text-decoration: underline;
+  font-weight: 500;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.roles ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+}
+
+.lifecycle-diagram {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 150px;
+  /* Placeholder style */
+  border: 1px dashed var(--border-color);
+  background: #f9f9f9;
+  border-radius: 8px;
+  padding: 1rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+/* Mission / CTA */
+.mission {
+  max-width: 700px;
+}
+
+.mission p {
+  margin-bottom: var(--spacing-md);
+  font-size: 1.1rem;
+}
+
+.cta-block {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.location {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+}
+
+/* .location::before {
+  content: "📍";
+  margin-right: 4px;
+} */
+
+/* About Section */
+.personal-notes {
+  margin-top: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Works links */
+.red-link {
+  color: var(--accent-color);
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.red-link:hover {
+  text-decoration: underline;
+}
+
+.links-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Footer */
+.main-footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-xl);
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid transparent;
+  /* Just spacing basically */
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+@media (min-width: 768px) {
+  .main-footer {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.footer-links {
+  display: flex;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.copyright {
+  color: var(--accent-color);
+  font-weight: 600;
+}
+
+.social-icons {
+  display: flex;
+  gap: var(--spacing-sm);
+  color: var(--text-secondary);
+}
+
+.social-icons a:hover {
+  color: var(--text-primary);
+}
