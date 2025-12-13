@@ -28,9 +28,11 @@ body {
 }
 
 .name {
-  font-weight: 700;
   font-size: 1.5rem;
   color: var(--accent-color);
+  font-family: var(--font-family-serif);
+  font-weight: 500;
+  /* Serif usually looks better with lighter weight */
 }
 
 .header-actions {
@@ -95,15 +97,19 @@ body {
 
 .hero h1 {
   font-size: 1.5rem;
-  font-weight: 700;
+  letter-spacing: -0.025em;
+  font-weight: 500;
+  /* Serif usually looks better with lighter weight */
   margin-bottom: var(--spacing-xxs);
   color: var(--text-primary);
+  font-family: var(--font-family-serif);
 }
 
 .subtitle {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
+  /* letter-spacing: -0.05em; */
   color: var(--text-secondary);
-  max-width: 600px;
+  max-width: 1000px;
 }
 
 /* Sections General */
@@ -112,10 +118,11 @@ section {
 }
 
 section h3 {
-  font-size: 1rem;
-  text-decoration: underline;
-  text-underline-offset: 4px;
-  margin-bottom: var(--spacing-sm);
+  font-family: var(--font-family-serif);
+  font-size: 1.25rem;
+  text-decoration: italic;
+  /* text-underline-offset: 4px; */
+  margin-bottom: var(--spacing-xs);
   font-weight: 500;
 }
 
@@ -124,7 +131,7 @@ section h3 {
   padding-left: 1.25rem;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.1rem;
 }
 
 .bullet-list li {
@@ -172,25 +179,25 @@ section h3 {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 150px;
-  /* Placeholder style */
-  border: 1px dashed var(--border-color);
-  background: #f9f9f9;
+  /* Removed placeholder styles */
+}
+
+.lifecycle-image {
+  max-width: 100%;
+  height: auto;
   border-radius: 8px;
-  padding: 1rem;
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-  text-align: center;
+  object-fit: contain;
 }
 
 /* Mission / CTA */
 .mission {
   max-width: 700px;
+  /* font-family: var(--font-family-serif);
+  font-size: 1.25rem; */
 }
 
 .mission p {
   margin-bottom: var(--spacing-md);
-  font-size: 1.1rem;
 }
 
 .cta-block {
