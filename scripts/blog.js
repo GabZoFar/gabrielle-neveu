@@ -70,7 +70,7 @@ const shell = ({ title, description, path, body }) => `<!doctype html>
     <meta property="og:title" content="${escape(title)}" />
     <meta property="og:description" content="${escape(description)}" />
     <meta property="og:url" content="${SITE_URL}${path}" />
-    <link rel="icon" type="image/png" href="/pfp.png" />
+    <link rel="icon" type="image/png" href="/avatar.png" />
     <link rel="alternate" type="application/rss+xml" title="Gabrielle Neveu" href="/feed.xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
