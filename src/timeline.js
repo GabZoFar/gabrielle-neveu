@@ -1,9 +1,9 @@
-// Scrubbable timeline: a fixed playhead over a strip of quarters (or years).
+// Scrubbable timeline: a fixed playhead over a strip of years (or quarters).
 // Every project, site version and post is a candle.
 // Candles that point somewhere are links: hover for a preview, click to visit.
 
 const SPACING = { quarters: 56, years: 96 };
-const PITCH = 7; // px between candles of the same quarter/year
+const PITCH = 11; // px between candles of the same quarter/year
 const MINOR_TICKS = { quarters: 2, years: 3 }; // months, quarters
 const MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
 
@@ -51,17 +51,17 @@ function candles(unit) {
     ...unit.projects.map((p) => ({
       kind: 'project',
       date: p.date,
-      h: 56,
+      h: 64,
       link: p.url && { url: p.url, preview: p.preview, title: p.title },
     })),
     ...unit.versions.map((v) => ({
       kind: 'version',
       date: v.date,
-      h: 46,
+      h: 54,
       link: v.url !== '/' && { url: v.url, preview: v.preview, title: `This site, v${v.id.slice(1)}` },
     })),
   ].sort((a, b) => a.date.localeCompare(b.date));
-  if (unit.posts.length) dated.push({ kind: 'post', h: 34 });
+  if (unit.posts.length) dated.push({ kind: 'post', h: 40 });
   return dated;
 }
 
@@ -144,7 +144,7 @@ export function initTimeline(root) {
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const peek = createPeek();
 
-  let zoom = 'quarters';
+  let zoom = 'years';
   let units = [];
   let index = 0;
   let offset = 0; // px the track is shifted left, index * spacing when settled
@@ -166,7 +166,7 @@ export function initTimeline(root) {
         const axis = axisLabel(u, zoom);
         const candleHtml = u.candles
           .map((c, j) => {
-            const x = (j - (u.candles.length - 1) / 2) * PITCH - 2;
+            const x = (j - (u.candles.length - 1) / 2) * PITCH - 3.5;
             const style = `height:${c.h}px;left:${x}px`;
             if (!c.link) return `<span class="bar ${c.kind}" style="${style}"></span>`;
             const external = c.link.url.startsWith('/') ? '' : ' target="_blank" rel="noopener"';
