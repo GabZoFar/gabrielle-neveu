@@ -81,7 +81,7 @@ const shell = ({ title, description, path, body }) => `<!doctype html>
     <div class="page">
 ${body}
       <footer class="footer">
-        <span>© ${new Date().getFullYear()} Gabrielle Neveu · Paris</span>
+        <span>© ${new Date().getFullYear()} Gabrielle Neveu</span>
         <nav>
           <a href="/blog/">Writing</a>
           <a href="/work/">Work with me</a>
