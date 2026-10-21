@@ -74,14 +74,14 @@
 
       <section class="section" aria-labelledby="history">
         <div class="section-head">
-          <h2 class="eyebrow" id="history">This site, over time</h2>
+          <h2 class="eyebrow" id="history">Over time</h2>
           <div class="segmented" role="group" aria-label="Zoom">
-            <button type="button" data-zoom="days" aria-pressed="true">days</button>
-            <button type="button" data-zoom="months" aria-pressed="false">months</button>
+            <button type="button" data-zoom="quarters" aria-pressed="true">quarters</button>
+            <button type="button" data-zoom="years" aria-pressed="false">years</button>
           </div>
         </div>
         <div class="timeline" data-timeline>
-          <div class="timeline-viewport" tabindex="0" role="slider" aria-label="Site history" aria-valuetext="">
+          <div class="timeline-viewport" tabindex="0" role="slider" aria-label="Projects over time" aria-valuetext="">
             <div class="timeline-track"></div>
             <div class="timeline-playhead" aria-hidden="true"><span class="timeline-label"></span></div>
           </div>
@@ -89,12 +89,13 @@
           <div class="timeline-jumps">
             <button type="button" data-jump="today">today</button>
             <button type="button" data-jump="year">a year ago</button>
-            <button type="button" data-jump="first">first version</button>
+            <button type="button" data-jump="first">first project</button>
           </div>
           <ul class="legend" aria-hidden="true">
-            <li><i class="dot version"></i>version</li>
+            <li><i class="dot project"></i>project</li>
+            <li><i class="dot version"></i>this site</li>
             <li><i class="dot post"></i>writing</li>
-            <li><i class="dot edit"></i>edits</li>
+            <li><i class="dot edit"></i>site edits</li>
           </ul>
         </div>
         <script type="application/json" id="history-data"><!-- history --></script>

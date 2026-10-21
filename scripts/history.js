@@ -1,4 +1,4 @@
-// Everything that happened to this site, grouped by day: versions, posts, edits.
+// Projects started, site versions, posts and site edits, grouped by day.
 // Edits come from git. Hosts that build from a shallow clone fall back to
 // content/edits.json, which every full-history build refreshes.
 import { execFileSync } from 'node:child_process';
@@ -9,6 +9,7 @@ import { getPosts } from './blog.js';
 const ROOT = resolve(import.meta.dirname, '..');
 const EDITS_CACHE = resolve(ROOT, 'content/edits.json');
 const VERSIONS = resolve(ROOT, 'content/versions.json');
+const PROJECTS = resolve(ROOT, 'content/projects.json');
 
 function gitEdits() {
   try {
@@ -42,15 +43,17 @@ function getEdits() {
   return existsSync(EDITS_CACHE) ? JSON.parse(readFileSync(EDITS_CACHE, 'utf8')) : [];
 }
 
-// [{ date, versions: [], posts: [], edits: [] }] sorted by date.
+// [{ date, projects: [], versions: [], posts: [], edits: [] }] sorted by date.
 export function getHistory({ drafts = false } = {}) {
   const days = new Map();
   const day = (date) => {
-    if (!days.has(date)) days.set(date, { date, versions: [], posts: [], edits: [] });
+    if (!days.has(date)) days.set(date, { date, projects: [], versions: [], posts: [], edits: [] });
     return days.get(date);
   };
+  for (const p of JSON.parse(readFileSync(PROJECTS, 'utf8'))) day(p.date).projects.push(p);
   for (const v of JSON.parse(readFileSync(VERSIONS, 'utf8'))) day(v.date).versions.push(v);
   for (const p of getPosts({ drafts })) day(p.date).posts.push({ title: p.title, url: `/blog/${p.slug}/` });
-  for (const e of getEdits()) day(e.date).edits.push(e.title);
+  // git log is newest first; keep each day's edits in the order they happened.
+  for (const e of getEdits().toReversed()) day(e.date).edits.push(e.title);
   return [...days.values()].sort((a, b) => a.date.localeCompare(b.date));
 }

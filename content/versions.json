@@ -1,4 +1,4 @@
 [
-  { "id": "v1", "date": "2025-12-07", "title": "Product, Growth & GenAI", "url": "/v1/" },
-  { "id": "v2", "date": "2026-10-21", "title": "Founder, Madame Studio", "url": "/" }
+  { "id": "v1", "date": "2025-12-07", "title": "Product, Growth & GenAI", "url": "/v1/", "preview": "/previews/site-v1.jpg" },
+  { "id": "v2", "date": "2026-10-21", "title": "Founder, Madame Studio", "url": "/", "preview": "/previews/site-v2.jpg" }
 ]

@@ -1,102 +1,141 @@
-// Scrubbable history: a fixed playhead over a strip of days (or months).
-// Versions, posts and edits from #history-data show up as bars.
+// Scrubbable timeline: a fixed playhead over a strip of quarters (or years).
+// Every project, site version, post and batch of site edits is a candle.
+// Candles that point somewhere are links: hover for a preview, click to visit.
 
-const SPACING = { days: 12, months: 40 };
-const DAY = 86_400_000;
+const SPACING = { quarters: 76, years: 168 };
+const PITCH = 7; // px between candles of the same quarter/year
+const MINOR_TICKS = { quarters: 2, years: 3 }; // months, quarters
 const MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
-const WEEKDAYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 
-const parse = (iso) => new Date(`${iso}T00:00:00Z`);
-const iso = (d) => d.toISOString().slice(0, 10);
-const monthKey = (iso) => iso.slice(0, 7);
 const escape = (s) => String(s).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+const quarterOf = (date) => `${date.slice(0, 4)}-Q${Math.floor((Number(date.slice(5, 7)) - 1) / 3) + 1}`;
+const keyOf = (date, zoom) => (zoom === 'quarters' ? quarterOf(date) : date.slice(0, 4));
+const shortDate = (date) => `${Number(date.slice(8, 10))} ${MONTHS[Number(date.slice(5, 7)) - 1]}`;
 
 function todayIso() {
   const now = new Date();
-  return iso(new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())));
+  return new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())).toISOString().slice(0, 10);
 }
 
-// One unit per day or per month, from a week before the first event to today.
+// Every quarter (or year) from the first event to today, each with its candles.
 function buildUnits(history, zoom) {
-  const today = parse(todayIso());
-  const start = new Date(parse(history[0].date).getTime() - 7 * DAY);
-  const byKey = new Map();
-  for (const day of history) {
-    const key = zoom === 'days' ? day.date : monthKey(day.date);
-    const unit = byKey.get(key) ?? { versions: [], posts: [], edits: [] };
-    unit.versions.push(...day.versions);
-    unit.posts.push(...day.posts);
-    unit.edits.push(...day.edits);
-    byKey.set(key, unit);
+  const first = history[0].date;
+  const today = todayIso();
+  const keys = [];
+  let year = Number(first.slice(0, 4));
+  let q = zoom === 'quarters' ? Number(quarterOf(first).slice(-1)) : 1;
+  while (true) {
+    const key = zoom === 'quarters' ? `${year}-Q${q}` : `${year}`;
+    keys.push(key);
+    if (key === keyOf(today, zoom)) break;
+    if (zoom === 'quarters' && q < 4) q += 1;
+    else [year, q] = [year + 1, 1];
   }
 
-  const units = [];
-  if (zoom === 'days') {
-    for (let t = start.getTime(); t <= today.getTime(); t += DAY) {
-      const date = iso(new Date(t));
-      units.push({ key: date, date: new Date(t), ...(byKey.get(date) ?? { versions: [], posts: [], edits: [] }) });
-    }
-  } else {
-    const d = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), 1));
-    while (d <= today) {
-      const key = monthKey(iso(d));
-      units.push({ key, date: new Date(d), ...(byKey.get(key) ?? { versions: [], posts: [], edits: [] }) });
-      d.setUTCMonth(d.getUTCMonth() + 1);
-    }
+  const units = keys.map((key) => ({ key, projects: [], versions: [], posts: [], edits: [] }));
+  const byKey = new Map(units.map((u) => [u.key, u]));
+  for (const day of history) {
+    const unit = byKey.get(keyOf(day.date, zoom));
+    if (!unit) continue;
+    unit.projects.push(...day.projects);
+    unit.versions.push(...day.versions);
+    unit.posts.push(...day.posts.map((p) => ({ ...p, date: day.date })));
+    unit.edits.push(...day.edits.map((title) => ({ title, date: day.date })));
   }
+  for (const u of units) u.candles = candles(u);
   return units;
 }
 
+// Projects and versions get a candle each (in date order); posts and edits one each.
+function candles(unit) {
+  const dated = [
+    ...unit.projects.map((p) => ({
+      kind: 'project',
+      date: p.date,
+      h: 56,
+      link: p.url && { url: p.url, preview: p.preview, title: p.title },
+    })),
+    ...unit.versions.map((v) => ({
+      kind: 'version',
+      date: v.date,
+      h: 46,
+      link: v.url !== '/' && { url: v.url, preview: v.preview, title: `This site, v${v.id.slice(1)}` },
+    })),
+  ].sort((a, b) => a.date.localeCompare(b.date));
+  if (unit.posts.length) dated.push({ kind: 'post', h: 34 });
+  if (unit.edits.length) dated.push({ kind: 'edit', h: Math.min(10 + Math.sqrt(unit.edits.length) * 4, 26) });
+  return dated;
+}
+
 function unitLabel(unit, zoom) {
-  const d = unit.date;
-  const thisYear = new Date().getFullYear();
-  if (zoom === 'months') {
-    if (unit.key === monthKey(todayIso())) return 'this month';
-    return `${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
-  }
-  const diff = Math.round((parse(todayIso()) - d) / DAY);
-  if (diff === 0) return 'today';
-  if (diff === 1) return 'yesterday';
-  const year = d.getUTCFullYear() === thisYear ? '' : ` ${d.getUTCFullYear()}`;
-  return `${WEEKDAYS[d.getUTCDay()]} ${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]}${year}`;
+  if (unit.key === keyOf(todayIso(), zoom)) return zoom === 'quarters' ? 'this quarter' : 'this year';
+  return zoom === 'quarters' ? unit.key.replace('-', ' ').replace(/(\d{4}) (Q\d)/, '$2 $1') : unit.key;
 }
 
 function axisLabel(unit, zoom) {
-  const d = unit.date;
-  if (zoom === 'months') {
-    return d.getUTCMonth() === 0 ? { text: d.getUTCFullYear(), strong: true } : { text: MONTHS[d.getUTCMonth()] };
-  }
-  if (d.getUTCDate() === 1) return { text: MONTHS[d.getUTCMonth()], strong: true };
-  if (d.getUTCDay() === 1) return { text: d.getUTCDate() };
-  return null;
-}
-
-function bars(unit) {
-  const out = [];
-  if (unit.versions.length) out.push({ kind: 'version', h: 56 });
-  if (unit.posts.length) out.push({ kind: 'post', h: 40 });
-  if (unit.edits.length) out.push({ kind: 'edit', h: Math.min(12 + unit.edits.length * 4, 34) });
-  return out;
+  if (zoom === 'years') return { text: unit.key, strong: true };
+  const [year, q] = unit.key.split('-');
+  return q === 'Q1' ? { text: year, strong: true } : { text: q };
 }
 
 function detail(unit, zoom) {
   const items = [];
+  for (const p of unit.projects) {
+    items.push(`<li><i class="dot project"></i><span><strong>${escape(p.title)}</strong> <span class="muted">${escape(p.note)}</span></span>
+      <span class="muted">started ${shortDate(p.date)}</span></li>`);
+  }
   for (const v of unit.versions) {
     const live = v.url === '/';
-    items.push(`<li><i class="dot version"></i><span><strong>Version ${escape(v.id.slice(1))}</strong> · ${escape(v.title)}</span>
-      ${live ? '<span class="muted">you are here</span>' : `<a href="${escape(v.url)}">visit ↗</a>`}</li>`);
+    items.push(`<li><i class="dot version"></i><span><strong>This site, v${escape(v.id.slice(1))}</strong> <span class="muted">${escape(v.title)}</span></span>
+      <span class="muted">${live ? 'you are here' : shortDate(v.date)}</span></li>`);
   }
   for (const p of unit.posts) {
-    items.push(`<li><i class="dot post"></i><span>Wrote <a href="${escape(p.url)}">${escape(p.title)}</a></span></li>`);
+    items.push(`<li><i class="dot post"></i><span>Wrote <a href="${escape(p.url)}">${escape(p.title)}</a></span>
+      <span class="muted">${shortDate(p.date)}</span></li>`);
   }
   if (unit.edits.length) {
-    const shown = unit.edits.slice(0, 3).map(escape).join(' · ');
-    const more = unit.edits.length > 3 ? ` <span class="muted">+${unit.edits.length - 3} more</span>` : '';
-    const count = `${unit.edits.length} edit${unit.edits.length > 1 ? 's' : ''}`;
-    items.push(`<li><i class="dot edit"></i><span><strong>${count}</strong> <span class="muted">${shown}${more}</span></span></li>`);
+    const latest = unit.edits.slice(-3).reverse().map((e) => escape(e.title)).join(' · ');
+    const count = `${unit.edits.length} site edit${unit.edits.length > 1 ? 's' : ''}`;
+    items.push(`<li><i class="dot edit"></i><span><strong>${count}</strong> <span class="muted">${latest}${unit.edits.length > 3 ? ' …' : ''}</span></span></li>`);
   }
-  if (!items.length) return `<p class="muted">Nothing changed that ${zoom === 'days' ? 'day' : 'month'}.</p>`;
+  if (!items.length) return `<p class="muted">Quiet ${zoom === 'quarters' ? 'quarter' : 'year'}.</p>`;
   return `<ul>${items.join('')}</ul>`;
+}
+
+function open(link) {
+  if (link.url.startsWith('/')) location.href = link.url;
+  else window.open(link.url, '_blank', 'noopener');
+}
+
+// A small screenshot that follows the mouse over linked candles.
+function createPeek() {
+  const peek = document.createElement('div');
+  peek.className = 'peek';
+  peek.setAttribute('aria-hidden', 'true');
+  peek.innerHTML = '<img alt="" /><span></span>';
+  document.body.append(peek);
+  const img = peek.querySelector('img');
+  const caption = peek.querySelector('span');
+  let current = null;
+
+  return {
+    show(link, x, y) {
+      if (current !== link) {
+        current = link;
+        img.src = link.preview;
+        caption.textContent = `${link.title} ${link.url.startsWith('/') ? '→' : '↗'}`;
+      }
+      const w = peek.offsetWidth || 240;
+      const h = peek.offsetHeight || 170;
+      const left = x + 18 + w > innerWidth - 8 ? x - 18 - w : x + 18;
+      const top = Math.min(y + 18, innerHeight - h - 8);
+      peek.style.transform = `translate(${left}px, ${top}px)`;
+      peek.classList.add('visible');
+    },
+    hide() {
+      peek.classList.remove('visible');
+    },
+  };
 }
 
 export function initTimeline(root) {
@@ -110,38 +149,52 @@ export function initTimeline(root) {
   const label = root.querySelector('.timeline-label');
   const detailEl = root.querySelector('.timeline-detail');
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const peek = createPeek();
 
-  let zoom = 'days';
+  let zoom = 'quarters';
   let units = [];
   let index = 0;
   let offset = 0; // px the track is shifted left, index * spacing when settled
 
   const spacing = () => SPACING[zoom];
   const clampIndex = (i) => Math.max(0, Math.min(units.length - 1, i));
+  const maxOffset = () => (units.length - 1) * spacing();
   const centre = () => viewport.clientWidth / 2;
+  const candleOf = (el) => el?.closest?.('a.bar');
+  const linkOf = (el) => {
+    const [u, c] = el.dataset.candle.split(':').map(Number);
+    return units[u].candles[c].link;
+  };
 
   function render() {
     units = buildUnits(history, zoom);
     track.innerHTML = units
       .map((u, i) => {
         const axis = axisLabel(u, zoom);
-        const b = bars(u);
-        const barHtml = b
-          .map((bar, j) => {
-            const x = (j - (b.length - 1) / 2) * 6;
-            return `<span class="bar ${bar.kind}" style="height:${bar.h}px;transform:translateX(${x}px)"></span>`;
+        const candleHtml = u.candles
+          .map((c, j) => {
+            const x = (j - (u.candles.length - 1) / 2) * PITCH - 2;
+            const style = `height:${c.h}px;left:${x}px`;
+            if (!c.link) return `<span class="bar ${c.kind}" style="${style}"></span>`;
+            const external = c.link.url.startsWith('/') ? '' : ' target="_blank" rel="noopener"';
+            return `<a class="bar ${c.kind}" style="${style}" href="${escape(c.link.url)}"${external} data-candle="${i}:${j}" tabindex="-1" draggable="false" aria-label="${escape(c.link.title)}"></a>`;
           })
           .join('');
-        return `<div class="unit${b.length ? ' has-events' : ''}" data-index="${i}" style="left:${i * spacing()}px">
-          ${barHtml}<span class="tick"></span>
-          ${axis ? `<span class="axis${axis.strong ? ' strong' : ''}">${axis.text}</span>` : ''}
+        const minor = i < units.length - 1 ? MINOR_TICKS[zoom] : 0;
+        const minorHtml = Array.from(
+          { length: minor },
+          (_, k) => `<span class="tick minor" style="left:${((k + 1) * spacing()) / (minor + 1)}px"></span>`,
+        ).join('');
+        return `<div class="unit" data-index="${i}" style="left:${i * spacing()}px">
+          ${candleHtml}<span class="tick"></span>${minorHtml}
+          <span class="axis${axis.strong ? ' strong' : ''}">${axis.text}</span>
         </div>`;
       })
       .join('');
   }
 
   function paint(animate) {
-    track.style.transition = animate && !reduceMotion ? 'transform 0.35s cubic-bezier(0.22, 1, 0.36, 1)' : 'none';
+    track.style.transition = animate && !reduceMotion ? 'transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)' : 'none';
     track.style.transform = `translateX(${centre() - offset}px)`;
     const nearest = clampIndex(Math.round(offset / spacing()));
     if (nearest !== index || !label.textContent) {
@@ -161,41 +214,68 @@ export function initTimeline(root) {
     paint(animate);
   }
 
-  function findIndex(predicate) {
+  const findIndex = (predicate, fallback = units.length - 1) => {
     const i = units.findIndex(predicate);
-    return i === -1 ? units.length - 1 : i;
-  }
+    return i === -1 ? fallback : i;
+  };
 
-  // Dragging, with a little momentum before snapping.
+  // Dragging, with a little momentum before snapping. Pointer capture only
+  // starts once it's a real drag, so a plain click still reaches the candle link.
   let drag = null;
+  let suppressClick = false;
   viewport.addEventListener('pointerdown', (e) => {
     if (e.button !== 0) return;
-    drag = { x: e.clientX, start: offset, t: e.timeStamp, v: 0, moved: false };
-    viewport.setPointerCapture(e.pointerId);
+    suppressClick = false;
+    drag = { x: e.clientX, start: offset, t: e.timeStamp, v: 0, moved: false, id: e.pointerId };
   });
   viewport.addEventListener('pointermove', (e) => {
+    const candle = candleOf(e.target);
+    if (!drag && e.pointerType === 'mouse' && candle) peek.show(linkOf(candle), e.clientX, e.clientY);
+    else peek.hide();
     if (!drag) return;
     const dx = e.clientX - drag.x;
-    if (Math.abs(dx) > 3) drag.moved = true;
-    const next = drag.start - dx;
-    const dt = Math.max(1, e.timeStamp - drag.t);
-    drag.v = (next - offset) / dt;
+    if (!drag.moved && Math.abs(dx) > 4) {
+      drag.moved = true;
+      viewport.setPointerCapture(drag.id);
+      viewport.classList.add('dragging');
+    }
+    if (!drag.moved) return;
+    const next = Math.max(0, Math.min(maxOffset(), drag.start - dx));
+    drag.v = (next - offset) / Math.max(1, e.timeStamp - drag.t);
     drag.t = e.timeStamp;
-    offset = Math.max(0, Math.min((units.length - 1) * spacing(), next));
+    offset = next;
     paint(false);
   });
+  viewport.addEventListener('pointerleave', () => peek.hide());
+
   const endDrag = (e) => {
     if (!drag) return;
     const { moved, v } = drag;
     drag = null;
-    if (!moved) {
-      const unit = e.target.closest?.('.unit');
-      if (unit) return goTo(Number(unit.dataset.index));
+    viewport.classList.remove('dragging');
+    if (moved) {
+      suppressClick = true;
+      return goTo(Math.round((offset + v * 220) / spacing()));
     }
-    goTo(Math.round((offset + v * 180) / spacing()));
+    const unit = e.target.closest?.('.unit');
+    if (!unit) return;
+    const i = Number(unit.dataset.index);
+    // On touch there's no hover: the first tap selects, the next one opens.
+    if (candleOf(e.target) && (e.pointerType === 'mouse' || i === index)) return;
+    suppressClick = true;
+    goTo(i);
   };
   viewport.addEventListener('pointerup', endDrag);
   viewport.addEventListener('pointercancel', endDrag);
+  viewport.addEventListener(
+    'click',
+    (e) => {
+      if (!suppressClick) return;
+      suppressClick = false;
+      e.preventDefault();
+    },
+    true,
+  );
 
   // Horizontal trackpad swipes scrub; vertical scrolling is left to the page.
   let wheelTimer;
@@ -204,7 +284,8 @@ export function initTimeline(root) {
     (e) => {
       if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
       e.preventDefault();
-      offset = Math.max(0, Math.min((units.length - 1) * spacing(), offset + e.deltaX));
+      peek.hide();
+      offset = Math.max(0, Math.min(maxOffset(), offset + e.deltaX));
       paint(false);
       clearTimeout(wheelTimer);
       wheelTimer = setTimeout(() => goTo(Math.round(offset / spacing())), 120);
@@ -213,10 +294,12 @@ export function initTimeline(root) {
   );
 
   viewport.addEventListener('keydown', (e) => {
-    const step = { ArrowLeft: -1, ArrowRight: 1, PageUp: -7, PageDown: 7 }[e.key];
+    const step = { ArrowLeft: -1, ArrowRight: 1 }[e.key];
+    const link = units[index].candles.find((c) => c.link)?.link;
     if (step) goTo(index + step);
     else if (e.key === 'Home') goTo(0);
     else if (e.key === 'End') goTo(units.length - 1);
+    else if (e.key === 'Enter' && link) open(link);
     else return;
     e.preventDefault();
   });
@@ -225,22 +308,22 @@ export function initTimeline(root) {
     btn.addEventListener('click', () => {
       const jump = btn.dataset.jump;
       if (jump === 'today') return goTo(units.length - 1);
-      if (jump === 'first') return goTo(findIndex((u) => u.versions.length));
+      if (jump === 'first') return goTo(findIndex((u) => u.projects.length));
       const target = new Date();
       target.setFullYear(target.getFullYear() - 1);
-      const key = zoom === 'days' ? iso(target) : monthKey(iso(target));
-      goTo(Math.max(0, findIndex((u) => u.key >= key)));
+      goTo(findIndex((u) => u.key === keyOf(target.toISOString().slice(0, 10), zoom), 0));
     }),
   );
 
   section.querySelectorAll('[data-zoom]').forEach((btn) =>
     btn.addEventListener('click', () => {
       if (btn.dataset.zoom === zoom) return;
-      const key = units[index].key;
+      const year = units[index].key.slice(0, 4);
       zoom = btn.dataset.zoom;
       section.querySelectorAll('[data-zoom]').forEach((b) => b.setAttribute('aria-pressed', b === btn));
       render();
-      goTo(findIndex((u) => u.key === (zoom === 'days' ? `${key}-01` : monthKey(key))), false);
+      // Years → quarters lands on that year's last quarter (or today's).
+      goTo(zoom === 'years' ? findIndex((u) => u.key === year) : findIndex((u) => u.key === `${year}-Q4`), false);
     }),
   );
 

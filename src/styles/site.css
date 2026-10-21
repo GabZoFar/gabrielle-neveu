@@ -457,13 +457,24 @@ a.row:hover .arrow {
   background: var(--line-strong);
 }
 
+.unit .tick.minor {
+  top: 109px;
+  height: 3px;
+  background: var(--line-strong);
+  opacity: 0.6;
+}
+
 .unit .bar {
   position: absolute;
   bottom: 38px;
-  left: -2px;
   width: 4px;
   border-radius: 2px;
-  transition: opacity 0.2s ease;
+  box-shadow: 0 0 0 1.5px var(--paper);
+  transition: filter 0.2s ease, margin 0.2s ease;
+}
+
+.bar.project {
+  background: var(--project);
 }
 
 .bar.version {
@@ -476,6 +487,27 @@ a.row:hover .arrow {
 
 .bar.edit {
   background: var(--edit);
+}
+
+/* Linked candles: a wider hover target and a small lift. */
+a.bar {
+  cursor: pointer;
+}
+
+a.bar::before {
+  content: '';
+  position: absolute;
+  inset: -12px -2px -6px;
+}
+
+.timeline-viewport:not(.dragging) a.bar:hover {
+  filter: brightness(1.2);
+  margin-bottom: 4px;
+}
+
+.timeline-viewport.dragging,
+.timeline-viewport.dragging a.bar {
+  cursor: grabbing;
 }
 
 .unit .axis {
@@ -505,10 +537,6 @@ a.row:hover .arrow {
   pointer-events: none;
 }
 
-/* Bars sit above the playhead line so none get hidden behind it. */
-.unit .bar {
-  box-shadow: 0 0 0 1.5px var(--paper);
-}
 
 .timeline-label {
   position: absolute;
@@ -563,6 +591,10 @@ a.row:hover .arrow {
   transform: translateY(-1px);
 }
 
+.dot.project {
+  background: var(--project);
+}
+
 .dot.version {
   background: var(--accent);
 }
@@ -604,6 +636,51 @@ a.row:hover .arrow {
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+/* Hover preview that follows the mouse */
+.peek {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 50;
+  width: 240px;
+  padding: 6px 6px 8px;
+  border-radius: 10px;
+  background: var(--paper);
+  box-shadow: 0 1px 2px rgba(35, 33, 29, 0.08), 0 12px 32px rgba(35, 33, 29, 0.18);
+  pointer-events: none;
+  opacity: 0;
+  scale: 0.96;
+  transition: opacity 0.15s ease, scale 0.15s ease;
+}
+
+.peek.visible {
+  opacity: 1;
+  scale: 1;
+}
+
+.peek img {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  object-position: top;
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.peek span {
+  display: block;
+  padding: 6px 4px 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .peek {
+    transition: none;
+  }
 }
 
 /* Active days */
