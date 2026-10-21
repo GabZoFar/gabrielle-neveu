@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { defineConfig } from 'vite';
 import { generateBlog, renderBlog, getPosts, postRows, feed } from './scripts/blog.js';
-import { getHistory, getWork } from './scripts/history.js';
+import { getHistory } from './scripts/history.js';
 import { getActivity } from './worker/activity.js';
 
 const CONTENT_DIR = resolve(import.meta.dirname, 'content');
@@ -30,11 +30,10 @@ function blog() {
     },
     // Fills the "Writing" list and the history timeline on the landing page.
     transformIndexHtml(html) {
-      const json = (value) => JSON.stringify(value).replace(/</g, '\\u003c');
+      const history = JSON.stringify(getHistory()).replace(/</g, '\\u003c');
       return html
         .replace('<!-- posts -->', postRows(getPosts({ drafts }).slice(0, 5)))
-        .replace('<!-- history -->', json(getHistory()))
-        .replace('<!-- work -->', json(getWork()));
+        .replace('<!-- history -->', history);
     },
     generateBundle() {
       this.emitFile({ type: 'asset', fileName: 'feed.xml', source: feed(getPosts()) });
