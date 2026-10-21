@@ -3,7 +3,7 @@
 // Candles that point somewhere are links: hover for a preview, click to visit.
 
 const SPACING = { quarters: 56, years: 96 };
-const PITCH = 11; // px between candles of the same quarter/year
+const PITCH = 15; // px between candles of the same quarter/year
 const MINOR_TICKS = { quarters: 2, years: 3 }; // months, quarters
 const MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
 
@@ -51,17 +51,17 @@ function candles(unit) {
     ...unit.projects.map((p) => ({
       kind: 'project',
       date: p.date,
-      h: 64,
+      h: 80,
       link: p.url && { url: p.url, preview: p.preview, title: p.title },
     })),
     ...unit.versions.map((v) => ({
       kind: 'version',
       date: v.date,
-      h: 54,
+      h: 68,
       link: v.url !== '/' && { url: v.url, preview: v.preview, title: `This site, v${v.id.slice(1)}` },
     })),
   ].sort((a, b) => a.date.localeCompare(b.date));
-  if (unit.posts.length) dated.push({ kind: 'post', h: 40 });
+  if (unit.posts.length) dated.push({ kind: 'post', h: 50 });
   return dated;
 }
 
@@ -166,7 +166,7 @@ export function initTimeline(root) {
         const axis = axisLabel(u, zoom);
         const candleHtml = u.candles
           .map((c, j) => {
-            const x = (j - (u.candles.length - 1) / 2) * PITCH - 3.5;
+            const x = (j - (u.candles.length - 1) / 2) * PITCH - 5;
             const style = `height:${c.h}px;left:${x}px`;
             if (!c.link) return `<span class="bar ${c.kind}" style="${style}"></span>`;
             const external = c.link.url.startsWith('/') ? '' : ' target="_blank" rel="noopener"';
