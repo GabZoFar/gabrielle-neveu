@@ -490,13 +490,13 @@ a.bar {
   cursor: pointer;
 }
 
-a.bar::before {
+[data-candle]::before {
   content: '';
   position: absolute;
   inset: -18px -2px -8px;
 }
 
-.timeline-viewport:not(.dragging) a.bar:hover {
+.timeline-viewport:not(.dragging) [data-candle]:hover {
   filter: brightness(1.2);
   margin-bottom: 4px;
 }

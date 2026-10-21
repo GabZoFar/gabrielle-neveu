@@ -54,7 +54,7 @@ function candles(unit) {
       kind: 'project',
       date: p.date,
       h: 68,
-      link: p.url && { url: p.url, preview: p.preview, title: p.title },
+      link: (p.url || p.preview) && { url: p.url ?? null, preview: p.preview, title: p.title },
     })),
     ...unit.versions.map((v) => ({
       kind: 'version',
@@ -104,6 +104,7 @@ function detail(unit, zoom) {
 const isHere = (link) => link.url === location.pathname;
 
 function open(link) {
+  if (!link.url) return;
   if (isHere(link)) scrollTo({ top: 0, behavior: 'smooth' });
   else if (link.url.startsWith('/')) location.href = link.url;
   else window.open(link.url, '_blank', 'noopener');
@@ -131,7 +132,7 @@ export function initTimeline(root) {
   const clampIndex = (i) => Math.max(0, Math.min(units.length - 1, i));
   const maxOffset = () => (units.length - 1) * spacing();
   const centre = () => viewport.clientWidth / 2;
-  const candleOf = (el) => el?.closest?.('a.bar');
+  const candleOf = (el) => el?.closest?.('[data-candle]');
   const linkOf = (el) => {
     const [u, c] = el.dataset.candle.split(':').map(Number);
     return units[u].candles[c].link;
@@ -147,6 +148,8 @@ export function initTimeline(root) {
             const x = (j - (u.candles.length - 1) / 2) * PITCH - 4;
             const style = `height:${c.h}px;left:${x}px`;
             if (!c.link) return `<span class="bar ${c.kind}" style="${style}"></span>`;
+            // Preview only: hoverable, not clickable.
+            if (!c.link.url) return `<span class="bar ${c.kind}" style="${style}" data-candle="${i}:${j}" aria-label="${escape(c.link.title)}"></span>`;
             const external = c.link.url.startsWith('/') ? '' : ' target="_blank" rel="noopener"';
             return `<a class="bar ${c.kind}" style="${style}" href="${escape(c.link.url)}"${external} data-candle="${i}:${j}" tabindex="-1" draggable="false" aria-label="${escape(c.link.title)}"></a>`;
           })
@@ -203,8 +206,8 @@ export function initTimeline(root) {
     const candle = candleOf(e.target);
     if (!drag && e.pointerType === 'mouse' && candle) {
       const link = linkOf(candle);
-      const arrow = isHere(link) ? '↑' : link.url.startsWith('/') ? '→' : '↗';
-      peek.show(link.preview, `${link.title} ${arrow}`, e.clientX, e.clientY);
+      const arrow = !link.url ? '' : isHere(link) ? ' ↑' : link.url.startsWith('/') ? ' →' : ' ↗';
+      peek.show(link.preview, `${link.title}${arrow}`, e.clientX, e.clientY);
     }
     else peek.hide();
     if (!drag) return;
