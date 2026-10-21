@@ -51,17 +51,17 @@ function candles(unit) {
     ...unit.projects.map((p) => ({
       kind: 'project',
       date: p.date,
-      h: 80,
+      h: 56,
       link: p.url && { url: p.url, preview: p.preview, title: p.title },
     })),
     ...unit.versions.map((v) => ({
       kind: 'version',
       date: v.date,
-      h: 68,
+      h: 46,
       link: v.url !== '/' && { url: v.url, preview: v.preview, title: `This site, v${v.id.slice(1)}` },
     })),
   ].sort((a, b) => a.date.localeCompare(b.date));
-  if (unit.posts.length) dated.push({ kind: 'post', h: 50 });
+  if (unit.posts.length) dated.push({ kind: 'post', h: 36 });
   return dated;
 }
 
