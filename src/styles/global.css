@@ -46,6 +46,10 @@ ul {
   list-style: none;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 img {
   max-width: 100%;
   display: block;
