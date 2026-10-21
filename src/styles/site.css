@@ -711,10 +711,10 @@ a.bar::before {
   background: none;
 }
 
-.github .l1 { background: #d6d0c2; }
-.github .l2 { background: #a39c8e; }
-.github .l3 { background: #6d675d; }
-.github .l4 { background: var(--ink); }
+.github .l1 { background: #cddbd3; }
+.github .l2 { background: #98b5a6; }
+.github .l3 { background: #68917e; }
+.github .l4 { background: var(--project); }
 
 .palmares .l1 { background: #f4c7bd; }
 .palmares .l2 { background: #ec9483; }
