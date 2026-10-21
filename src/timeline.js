@@ -2,7 +2,7 @@
 // Every project, site version and post is a candle.
 // Candles that point somewhere are links: hover for a preview, click to visit.
 
-const SPACING = { quarters: 76, years: 168 };
+const SPACING = { quarters: 56, years: 96 };
 const PITCH = 7; // px between candles of the same quarter/year
 const MINOR_TICKS = { quarters: 2, years: 3 }; // months, quarters
 const MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
