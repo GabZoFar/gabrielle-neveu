@@ -2,6 +2,8 @@
 // Every project, site version and post is a candle.
 // Candles that point somewhere are links: hover for a preview, click to visit.
 
+import { getPeek } from './peek.js';
+
 const SPACING = { quarters: 56, years: 96 };
 const PITCH = 13; // px between candles of the same quarter/year
 const MINOR_TICKS = { quarters: 2, years: 3 }; // months, quarters
@@ -107,37 +109,6 @@ function open(link) {
   else window.open(link.url, '_blank', 'noopener');
 }
 
-// A small screenshot that follows the mouse over linked candles.
-function createPeek() {
-  const peek = document.createElement('div');
-  peek.className = 'peek';
-  peek.setAttribute('aria-hidden', 'true');
-  peek.innerHTML = '<img alt="" /><span></span>';
-  document.body.append(peek);
-  const img = peek.querySelector('img');
-  const caption = peek.querySelector('span');
-  let current = null;
-
-  return {
-    show(link, x, y) {
-      if (current !== link) {
-        current = link;
-        img.src = link.preview;
-        caption.textContent = `${link.title} ${isHere(link) ? '↑' : link.url.startsWith('/') ? '→' : '↗'}`;
-      }
-      const w = peek.offsetWidth || 240;
-      const h = peek.offsetHeight || 170;
-      const left = x + 18 + w > innerWidth - 8 ? x - 18 - w : x + 18;
-      const top = Math.min(y + 18, innerHeight - h - 8);
-      peek.style.transform = `translate(${left}px, ${top}px)`;
-      peek.classList.add('visible');
-    },
-    hide() {
-      peek.classList.remove('visible');
-    },
-  };
-}
-
 export function initTimeline(root) {
   const data = document.getElementById('history-data');
   const history = JSON.parse(data?.textContent || '[]');
@@ -149,7 +120,7 @@ export function initTimeline(root) {
   const label = root.querySelector('.timeline-label');
   const detailEl = root.querySelector('.timeline-detail');
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const peek = createPeek();
+  const peek = getPeek();
 
   let zoom = 'years';
   let units = [];
@@ -230,7 +201,11 @@ export function initTimeline(root) {
   });
   viewport.addEventListener('pointermove', (e) => {
     const candle = candleOf(e.target);
-    if (!drag && e.pointerType === 'mouse' && candle) peek.show(linkOf(candle), e.clientX, e.clientY);
+    if (!drag && e.pointerType === 'mouse' && candle) {
+      const link = linkOf(candle);
+      const arrow = isHere(link) ? '↑' : link.url.startsWith('/') ? '→' : '↗';
+      peek.show(link.preview, `${link.title} ${arrow}`, e.clientX, e.clientY);
+    }
     else peek.hide();
     if (!drag) return;
     const dx = e.clientX - drag.x;
