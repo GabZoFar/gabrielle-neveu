@@ -55,12 +55,14 @@ function candles(unit) {
       kind: 'work',
       date: w.date,
       h: 60,
+      tag: w.tag ?? 'new job!',
       link: { url: w.url ?? null, preview: w.preview, title: `${w.title} · ${w.note}` },
     })),
     ...unit.projects.map((p) => ({
       kind: 'project',
       date: p.date,
       h: 68,
+      tag: p.tag,
       link: (p.url || p.preview) && { url: p.url ?? null, preview: p.preview, title: p.title },
     })),
     ...unit.versions.map((v) => ({
@@ -158,12 +160,12 @@ export function initTimeline(root) {
           .map((c, j) => {
             const x = (j - (u.candles.length - 1) / 2) * PITCH - 4;
             const style = `height:${c.h}px;left:${x}px`;
-            // Jobs get a small handwritten-style note, leaning away from their neighbours.
+            // Jobs (and a few projects) get a small note, leaning away from their neighbours.
             const side = j === u.candles.length - 1 ? 'right' : 'left';
-            const tag = c.kind === 'work'
-              ? `<span class="job-tag ${side}" style="left:${x + 4}px;bottom:${38 + c.h + 5}px" aria-hidden="true"><span>new job!</span></span>`
+            const tag = c.tag
+              ? `<span class="candle-tag ${side}" style="left:${x + 4}px;bottom:${38 + c.h + 5}px" aria-hidden="true"><span>${escape(c.tag)}</span></span>`
               : '';
-            if (!c.link) return `<span class="bar ${c.kind}" style="${style}"></span>`;
+            if (!c.link) return `${tag}<span class="bar ${c.kind}" style="${style}"></span>`;
             // Preview only: hoverable, not clickable.
             if (!c.link.url) return `${tag}<span class="bar ${c.kind}" style="${style}" data-candle="${i}:${j}" aria-label="${escape(c.link.title)}"></span>`;
             const external = c.link.url.startsWith('/') ? '' : ' target="_blank" rel="noopener"';

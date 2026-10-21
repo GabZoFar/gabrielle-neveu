@@ -416,7 +416,7 @@ a.row:hover .arrow {
 /* Timeline */
 .timeline-viewport {
   position: relative;
-  height: 150px;
+  height: 172px;
   overflow: hidden;
   cursor: grab;
   touch-action: pan-y;
@@ -446,7 +446,7 @@ a.row:hover .arrow {
   position: absolute;
   left: -2000px;
   right: -2000px;
-  top: 112px;
+  top: 134px;
   border-top: 1px solid var(--line);
 }
 
@@ -459,7 +459,7 @@ a.row:hover .arrow {
 
 .unit .tick {
   position: absolute;
-  top: 106px;
+  top: 128px;
   left: -0.5px;
   width: 1px;
   height: 6px;
@@ -467,7 +467,7 @@ a.row:hover .arrow {
 }
 
 .unit .tick.minor {
-  top: 109px;
+  top: 131px;
   height: 3px;
   background: var(--line-strong);
   opacity: 0.6;
@@ -514,16 +514,15 @@ a.bar {
   margin-bottom: 4px;
 }
 
-/* "new job!" notes above job candles: a short stroke, then the word. */
-.job-tag {
+/* Notes like "new job!" above some candles: a short stroke, then the word. */
+.candle-tag {
   position: absolute;
   width: 0;
   height: 0;
   pointer-events: none;
-  transition: opacity 0.2s ease;
 }
 
-.job-tag::before {
+.candle-tag::before {
   content: '';
   position: absolute;
   bottom: 0;
@@ -536,11 +535,11 @@ a.bar {
   transform: rotate(32deg);
 }
 
-.job-tag.left::before {
+.candle-tag.left::before {
   transform: rotate(-32deg);
 }
 
-.job-tag span {
+.candle-tag span {
   position: absolute;
   bottom: 11px;
   font-family: var(--serif);
@@ -551,17 +550,12 @@ a.bar {
   white-space: nowrap;
 }
 
-.job-tag.right span {
+.candle-tag.right span {
   left: 12px;
 }
 
-.job-tag.left span {
+.candle-tag.left span {
   right: 14px;
-}
-
-/* A lone job candle under the playhead would collide with the year label. */
-.unit.active .job-tag.right {
-  opacity: 0;
 }
 
 .timeline-viewport.dragging,
@@ -571,7 +565,7 @@ a.bar {
 
 .unit .axis {
   position: absolute;
-  top: 120px;
+  top: 142px;
   transform: translateX(-50%);
   font-size: 11.5px;
   color: var(--muted);
