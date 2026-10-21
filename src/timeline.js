@@ -158,11 +158,16 @@ export function initTimeline(root) {
           .map((c, j) => {
             const x = (j - (u.candles.length - 1) / 2) * PITCH - 4;
             const style = `height:${c.h}px;left:${x}px`;
+            // Jobs get a small handwritten-style note, leaning away from their neighbours.
+            const side = j === u.candles.length - 1 ? 'right' : 'left';
+            const tag = c.kind === 'work'
+              ? `<span class="job-tag ${side}" style="left:${x + 4}px;bottom:${38 + c.h + 5}px" aria-hidden="true"><span>new job!</span></span>`
+              : '';
             if (!c.link) return `<span class="bar ${c.kind}" style="${style}"></span>`;
             // Preview only: hoverable, not clickable.
-            if (!c.link.url) return `<span class="bar ${c.kind}" style="${style}" data-candle="${i}:${j}" aria-label="${escape(c.link.title)}"></span>`;
+            if (!c.link.url) return `${tag}<span class="bar ${c.kind}" style="${style}" data-candle="${i}:${j}" aria-label="${escape(c.link.title)}"></span>`;
             const external = c.link.url.startsWith('/') ? '' : ' target="_blank" rel="noopener"';
-            return `<a class="bar ${c.kind}" style="${style}" href="${escape(c.link.url)}"${external} data-candle="${i}:${j}" tabindex="-1" draggable="false" aria-label="${escape(c.link.title)}"></a>`;
+            return `${tag}<a class="bar ${c.kind}" style="${style}" href="${escape(c.link.url)}"${external} data-candle="${i}:${j}" tabindex="-1" draggable="false" aria-label="${escape(c.link.title)}"></a>`;
           })
           .join('');
         const minor = i < units.length - 1 ? MINOR_TICKS[zoom] : 0;

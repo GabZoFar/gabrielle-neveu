@@ -514,6 +514,56 @@ a.bar {
   margin-bottom: 4px;
 }
 
+/* "new job!" notes above job candles: a short stroke, then the word. */
+.job-tag {
+  position: absolute;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.job-tag::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: -0.75px;
+  width: 1.5px;
+  height: 15px;
+  border-radius: 1px;
+  background: var(--muted);
+  transform-origin: bottom center;
+  transform: rotate(32deg);
+}
+
+.job-tag.left::before {
+  transform: rotate(-32deg);
+}
+
+.job-tag span {
+  position: absolute;
+  bottom: 11px;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.job-tag.right span {
+  left: 12px;
+}
+
+.job-tag.left span {
+  right: 14px;
+}
+
+/* A lone job candle under the playhead would collide with the year label. */
+.unit.active .job-tag.right {
+  opacity: 0;
+}
+
 .timeline-viewport.dragging,
 .timeline-viewport.dragging a.bar {
   cursor: grabbing;
