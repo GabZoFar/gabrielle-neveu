@@ -58,7 +58,11 @@ function candles(unit) {
       kind: 'version',
       date: v.date,
       h: 56,
-      link: v.url !== '/' && { url: v.url, preview: v.preview, title: `This site, v${v.id.slice(1)}` },
+      link: {
+        url: v.url,
+        preview: v.preview,
+        title: v.url === '/' ? `This site, v${v.id.slice(1)} · you are here` : `This site, v${v.id.slice(1)}`,
+      },
     })),
   ].sort((a, b) => a.date.localeCompare(b.date));
   if (unit.posts.length) dated.push({ kind: 'post', h: 44 });
@@ -95,8 +99,11 @@ function detail(unit, zoom) {
   return `<ul>${items.join('')}</ul>`;
 }
 
+const isHere = (link) => link.url === location.pathname;
+
 function open(link) {
-  if (link.url.startsWith('/')) location.href = link.url;
+  if (isHere(link)) scrollTo({ top: 0, behavior: 'smooth' });
+  else if (link.url.startsWith('/')) location.href = link.url;
   else window.open(link.url, '_blank', 'noopener');
 }
 
@@ -116,7 +123,7 @@ function createPeek() {
       if (current !== link) {
         current = link;
         img.src = link.preview;
-        caption.textContent = `${link.title} ${link.url.startsWith('/') ? '→' : '↗'}`;
+        caption.textContent = `${link.title} ${isHere(link) ? '↑' : link.url.startsWith('/') ? '→' : '↗'}`;
       }
       const w = peek.offsetWidth || 240;
       const h = peek.offsetHeight || 170;
@@ -263,6 +270,12 @@ export function initTimeline(root) {
   viewport.addEventListener(
     'click',
     (e) => {
+      const candle = candleOf(e.target);
+      if (!suppressClick && candle && isHere(linkOf(candle))) {
+        e.preventDefault();
+        open(linkOf(candle));
+        return;
+      }
       if (!suppressClick) return;
       suppressClick = false;
       e.preventDefault();
