@@ -30,7 +30,7 @@ function blog() {
     },
     // Fills the "Writing" list and the history timeline on the landing page.
     transformIndexHtml(html) {
-      const history = JSON.stringify(getHistory({ drafts })).replace(/</g, '\\u003c');
+      const history = JSON.stringify(getHistory()).replace(/</g, '\\u003c');
       return html
         .replace('<!-- posts -->', postRows(getPosts({ drafts }).slice(0, 5)))
         .replace('<!-- history -->', history);
