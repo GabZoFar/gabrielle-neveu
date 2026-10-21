@@ -689,6 +689,9 @@ a.bar::before {
 }
 
 .activity-row a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-weight: 500;
   text-decoration: none;
 }
