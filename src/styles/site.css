@@ -416,7 +416,7 @@ a.row:hover .arrow {
 /* Timeline */
 .timeline-viewport {
   position: relative;
-  height: 150px;
+  height: 166px;
   overflow: hidden;
   cursor: grab;
   touch-action: pan-y;
@@ -494,6 +494,31 @@ a.row:hover .arrow {
   background: var(--post);
 }
 
+/* Jobs: spans under the axis */
+.span {
+  position: absolute;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--work);
+  opacity: 0.85;
+  transition: opacity 0.2s ease, filter 0.2s ease;
+}
+
+.span::before {
+  content: '';
+  position: absolute;
+  inset: -4px 0;
+}
+
+a.span {
+  cursor: pointer;
+}
+
+.timeline-viewport:not(.dragging) .span:hover {
+  opacity: 1;
+  filter: brightness(0.9);
+}
+
 /* Linked candles: a wider hover target and a small lift. */
 a.bar {
   cursor: pointer;
@@ -534,7 +559,7 @@ a.bar {
   position: absolute;
   top: 8px;
   left: 50%;
-  bottom: 30px;
+  bottom: 46px;
   width: 2px;
   margin-left: -1px;
   background: var(--ink);
@@ -594,6 +619,10 @@ a.bar {
   height: 7px;
   border-radius: 50%;
   transform: translateY(-1px);
+}
+
+.dot.work {
+  background: var(--work);
 }
 
 .dot.project {

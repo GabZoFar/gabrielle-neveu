@@ -1,5 +1,5 @@
 // Scrubbable timeline: a fixed playhead over a strip of years (or quarters).
-// Every project, site version and post is a candle.
+// Every project, site version and post is a candle; jobs are spans under the axis.
 // Candles that point somewhere are links: hover for a preview, click to visit.
 
 import { getPeek } from './peek.js';
@@ -7,6 +7,8 @@ import { getPeek } from './peek.js';
 const SPACING = { quarters: 56, years: 96 };
 const PITCH = 13; // px between candles of the same quarter/year
 const MINOR_TICKS = { quarters: 2, years: 3 }; // months, quarters
+const SPAN_TOP = 140; // px from the top of the viewport to the first row of spans
+const SPAN_ROW = 9;
 const MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
 
 const escape = (s) => String(s).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
@@ -19,9 +21,9 @@ function todayIso() {
   return new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())).toISOString().slice(0, 10);
 }
 
-// Every quarter (or year) from the first event to today, each with its candles.
-function buildUnits(history, zoom) {
-  const first = history[0].date;
+// Every quarter (or year) from the first event or job to today, each with its candles.
+function buildUnits(history, work, zoom) {
+  const first = [history[0].date, ...work.map((w) => `${w.from}-01-01`)].sort()[0];
   const today = todayIso();
   const keys = [];
   let year = Number(first.slice(0, 4));
@@ -34,7 +36,7 @@ function buildUnits(history, zoom) {
     else [year, q] = [year + 1, 1];
   }
 
-  const units = keys.map((key) => ({ key, projects: [], versions: [], posts: [] }));
+  const units = keys.map((key) => ({ key, projects: [], versions: [], posts: [], work: [] }));
   const byKey = new Map(units.map((u) => [u.key, u]));
   for (const day of history) {
     const unit = byKey.get(keyOf(day.date, zoom));
@@ -43,7 +45,11 @@ function buildUnits(history, zoom) {
     unit.versions.push(...day.versions);
     unit.posts.push(...day.posts.map((p) => ({ ...p, date: day.date })));
   }
-  for (const u of units) u.candles = candles(u);
+  for (const u of units) {
+    const year = u.key.slice(0, 4);
+    u.work = work.filter((w) => w.from <= year && year <= w.to);
+    u.candles = candles(u);
+  }
   return units;
 }
 
@@ -84,6 +90,11 @@ function axisLabel(unit, zoom) {
 
 function detail(unit, zoom) {
   const items = [];
+  for (const w of unit.work) {
+    const years = w.from === w.to ? w.from : `${w.from}–${w.to}`;
+    items.push(`<li><i class="dot work"></i><span><strong>${escape(w.title)}</strong> <span class="muted">${escape(w.role)}</span></span>
+      <span class="muted">${years}</span></li>`);
+  }
   for (const p of unit.projects) {
     items.push(`<li><i class="dot project"></i><span><strong>${escape(p.title)}</strong> <span class="muted">${escape(p.note)}</span></span>
       <span class="muted">started ${shortDate(p.date)}</span></li>`);
@@ -114,6 +125,7 @@ export function initTimeline(root) {
   const data = document.getElementById('history-data');
   const history = JSON.parse(data?.textContent || '[]');
   if (!history.length) return;
+  const work = JSON.parse(document.getElementById('work-data')?.textContent || '[]');
 
   const section = root.closest('section');
   const viewport = root.querySelector('.timeline-viewport');
@@ -132,14 +144,50 @@ export function initTimeline(root) {
   const clampIndex = (i) => Math.max(0, Math.min(units.length - 1, i));
   const maxOffset = () => (units.length - 1) * spacing();
   const centre = () => viewport.clientWidth / 2;
-  const candleOf = (el) => el?.closest?.('[data-candle]');
+  const candleOf = (el) => el?.closest?.('[data-candle], [data-span]');
   const linkOf = (el) => {
+    if (el.dataset.span) {
+      const w = work[Number(el.dataset.span)];
+      return { url: w.url ?? null, preview: w.preview, title: w.title };
+    }
     const [u, c] = el.dataset.candle.split(':').map(Number);
     return units[u].candles[c].link;
   };
 
+  // x of a date on the track: unit i is centred on i * spacing.
+  const xOf = (date) => {
+    const i = units.findIndex((u) => u.key === keyOf(date, zoom));
+    const year = Number(date.slice(0, 4));
+    const start =
+      zoom === 'years'
+        ? Date.UTC(year, 0, 1)
+        : Date.UTC(year, (Number(quarterOf(date).slice(-1)) - 1) * 3, 1);
+    const end = zoom === 'years' ? Date.UTC(year + 1, 0, 1) : Date.UTC(year, (Number(quarterOf(date).slice(-1)) - 1) * 3 + 3, 1);
+    const frac = (Date.parse(`${date}T00:00:00Z`) - start) / (end - start);
+    return (i - 0.5 + frac) * spacing();
+  };
+
+  // Jobs as spans; overlapping ones go on separate rows.
+  function spansHtml() {
+    const rows = [];
+    return work
+      .map((w, k) => {
+        const from = `${w.from}-01-01`;
+        const to = [`${w.to}-12-31`, todayIso()].sort()[0];
+        let row = rows.findIndex((end) => end < from);
+        if (row === -1) row = rows.length;
+        rows[row] = to;
+        const left = xOf(from);
+        const style = `left:${left}px;width:${Math.max(6, xOf(to) - left)}px;top:${SPAN_TOP + row * SPAN_ROW}px`;
+        const label = `${w.title}, ${w.from}–${w.to}`;
+        if (!w.url) return `<span class="span" style="${style}" data-span="${k}" aria-label="${escape(label)}"></span>`;
+        return `<a class="span" style="${style}" href="${escape(w.url)}" target="_blank" rel="noopener" data-span="${k}" tabindex="-1" draggable="false" aria-label="${escape(label)}"></a>`;
+      })
+      .join('');
+  }
+
   function render() {
-    units = buildUnits(history, zoom);
+    units = buildUnits(history, work, zoom);
     track.innerHTML = units
       .map((u, i) => {
         const axis = axisLabel(u, zoom);
@@ -165,6 +213,7 @@ export function initTimeline(root) {
         </div>`;
       })
       .join('');
+    track.insertAdjacentHTML('beforeend', spansHtml());
   }
 
   function paint(animate) {
