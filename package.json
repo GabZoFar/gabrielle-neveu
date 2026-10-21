@@ -10,6 +10,7 @@
     "deploy": "pnpm run build && wrangler pages deploy dist"
   },
   "devDependencies": {
+    "marked": "^18.1.1",
     "vite": "^7.2.4",
     "wrangler": "^4.54.0"
   }
