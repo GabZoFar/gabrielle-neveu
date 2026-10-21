@@ -1,5 +1,5 @@
 // Scrubbable timeline: a fixed playhead over a strip of quarters (or years).
-// Every project, site version, post and batch of site edits is a candle.
+// Every project, site version and post is a candle.
 // Candles that point somewhere are links: hover for a preview, click to visit.
 
 const SPACING = { quarters: 76, years: 168 };
@@ -32,7 +32,7 @@ function buildUnits(history, zoom) {
     else [year, q] = [year + 1, 1];
   }
 
-  const units = keys.map((key) => ({ key, projects: [], versions: [], posts: [], edits: [] }));
+  const units = keys.map((key) => ({ key, projects: [], versions: [], posts: [] }));
   const byKey = new Map(units.map((u) => [u.key, u]));
   for (const day of history) {
     const unit = byKey.get(keyOf(day.date, zoom));
@@ -40,13 +40,12 @@ function buildUnits(history, zoom) {
     unit.projects.push(...day.projects);
     unit.versions.push(...day.versions);
     unit.posts.push(...day.posts.map((p) => ({ ...p, date: day.date })));
-    unit.edits.push(...day.edits.map((title) => ({ title, date: day.date })));
   }
   for (const u of units) u.candles = candles(u);
   return units;
 }
 
-// Projects and versions get a candle each (in date order); posts and edits one each.
+// Projects and versions get a candle each (in date order); posts share one.
 function candles(unit) {
   const dated = [
     ...unit.projects.map((p) => ({
@@ -63,7 +62,6 @@ function candles(unit) {
     })),
   ].sort((a, b) => a.date.localeCompare(b.date));
   if (unit.posts.length) dated.push({ kind: 'post', h: 34 });
-  if (unit.edits.length) dated.push({ kind: 'edit', h: Math.min(10 + Math.sqrt(unit.edits.length) * 4, 26) });
   return dated;
 }
 
@@ -92,11 +90,6 @@ function detail(unit, zoom) {
   for (const p of unit.posts) {
     items.push(`<li><i class="dot post"></i><span>Wrote <a href="${escape(p.url)}">${escape(p.title)}</a></span>
       <span class="muted">${shortDate(p.date)}</span></li>`);
-  }
-  if (unit.edits.length) {
-    const latest = unit.edits.slice(-3).reverse().map((e) => escape(e.title)).join(' · ');
-    const count = `${unit.edits.length} site edit${unit.edits.length > 1 ? 's' : ''}`;
-    items.push(`<li><i class="dot edit"></i><span><strong>${count}</strong> <span class="muted">${latest}${unit.edits.length > 3 ? ' …' : ''}</span></span></li>`);
   }
   if (!items.length) return `<p class="muted">Quiet ${zoom === 'quarters' ? 'quarter' : 'year'}.</p>`;
   return `<ul>${items.join('')}</ul>`;

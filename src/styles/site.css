@@ -485,10 +485,6 @@ a.row:hover .arrow {
   background: var(--post);
 }
 
-.bar.edit {
-  background: var(--edit);
-}
-
 /* Linked candles: a wider hover target and a small lift. */
 a.bar {
   cursor: pointer;
@@ -601,10 +597,6 @@ a.bar::before {
 
 .dot.post {
   background: var(--post);
-}
-
-.dot.edit {
-  background: var(--edit);
 }
 
 .timeline-jumps {
