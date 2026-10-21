@@ -1,5 +1,5 @@
 // Scrubbable timeline: a fixed playhead over a strip of years (or quarters).
-// Every project, site version and post is a candle.
+// Every job, project, site version and post is a candle.
 // Candles that point somewhere are links: hover for a preview, click to visit.
 
 import { getPeek } from './peek.js';
@@ -34,11 +34,12 @@ function buildUnits(history, zoom) {
     else [year, q] = [year + 1, 1];
   }
 
-  const units = keys.map((key) => ({ key, projects: [], versions: [], posts: [] }));
+  const units = keys.map((key) => ({ key, work: [], projects: [], versions: [], posts: [] }));
   const byKey = new Map(units.map((u) => [u.key, u]));
   for (const day of history) {
     const unit = byKey.get(keyOf(day.date, zoom));
     if (!unit) continue;
+    unit.work.push(...(day.work ?? []));
     unit.projects.push(...day.projects);
     unit.versions.push(...day.versions);
     unit.posts.push(...day.posts.map((p) => ({ ...p, date: day.date })));
@@ -47,9 +48,15 @@ function buildUnits(history, zoom) {
   return units;
 }
 
-// Projects and versions get a candle each (in date order); posts share one.
+// Jobs, projects and versions get a candle each (in date order); posts share one.
 function candles(unit) {
   const dated = [
+    ...unit.work.map((w) => ({
+      kind: 'work',
+      date: w.date,
+      h: 60,
+      link: { url: w.url ?? null, preview: w.preview, title: `${w.title} · ${w.note}` },
+    })),
     ...unit.projects.map((p) => ({
       kind: 'project',
       date: p.date,
@@ -84,6 +91,10 @@ function axisLabel(unit, zoom) {
 
 function detail(unit, zoom) {
   const items = [];
+  for (const w of unit.work) {
+    items.push(`<li><i class="dot work"></i><span><strong>${escape(w.title)}</strong> <span class="muted">${escape(w.note)}</span></span>
+      <span class="muted">${escape(w.year)}</span></li>`);
+  }
   for (const p of unit.projects) {
     items.push(`<li><i class="dot project"></i><span><strong>${escape(p.title)}</strong> <span class="muted">${escape(p.note)}</span></span>
       <span class="muted">started ${shortDate(p.date)}</span></li>`);

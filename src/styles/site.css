@@ -482,6 +482,10 @@ a.row:hover .arrow {
   transition: filter 0.2s ease, margin 0.2s ease;
 }
 
+.bar.work {
+  background: var(--work);
+}
+
 .bar.project {
   background: var(--project);
 }
@@ -594,6 +598,10 @@ a.bar {
   height: 7px;
   border-radius: 50%;
   transform: translateY(-1px);
+}
+
+.dot.work {
+  background: var(--work);
 }
 
 .dot.project {
