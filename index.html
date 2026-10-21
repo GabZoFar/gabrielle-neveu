@@ -101,7 +101,13 @@
       </section>
 
       <section class="section activity" aria-labelledby="activity" hidden>
-        <h2 class="eyebrow" id="activity">Active days</h2>
+        <div class="section-head">
+          <h2 class="eyebrow" id="activity">Active days</h2>
+          <div class="segmented" role="group" aria-label="Period">
+            <button type="button" data-range="half" aria-pressed="false">6 months</button>
+            <button type="button" data-range="year" aria-pressed="true">year</button>
+          </div>
+        </div>
         <div class="activity-rows"></div>
       </section>
 

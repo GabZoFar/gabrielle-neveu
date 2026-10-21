@@ -31,26 +31,40 @@ export async function initActivity(section) {
     return;
   }
 
-  // Phones get half a year so the squares stay big enough to read.
-  const narrow = matchMedia('(max-width: 560px)');
+  const RANGES = {
+    half: { days: 182, text: 'these past 6 months', label: 'the last 6 months' },
+    year: { days: 364, text: 'this past year', label: 'the last year' },
+  };
+  const buttons = section.querySelectorAll('[data-range]');
+  // Phones start on half a year so the squares stay big enough to read.
+  let range = matchMedia('(max-width: 560px)').matches ? 'half' : 'year';
+
   const render = () => {
-    const range = narrow.matches
-      ? { days: 182, text: 'these past 6 months', label: 'the last 6 months' }
-      : { days: 364, text: 'this past year', label: 'the last year' };
+    const r = RANGES[range];
+    buttons.forEach((b) => b.setAttribute('aria-pressed', b.dataset.range === range));
     const rows = SOURCES.filter((s) => data[s.key]?.length).map((s) => {
-      const days = data[s.key].slice(-range.days);
+      const days = data[s.key].slice(-r.days);
       const active = days.filter((d) => d.level > 0).length;
       return `<div class="activity-row ${s.key}">
       <p><a href="${s.href}" target="_blank" rel="noopener noreferrer">${s.icon ?? ''}${s.name}</a>
-        <span class="muted">${active} days ${s.unit} ${range.text}</span></p>
-      <div class="activity-grid" role="img" aria-label="${s.name}: ${active} active days in ${range.label}">${grid(days)}</div>
+        <span class="muted">${active} days ${s.unit} ${r.text}</span></p>
+      <div class="activity-scroll">
+        <div class="activity-grid" role="img" aria-label="${s.name}: ${active} active days in ${r.label}">${grid(days)}</div>
+      </div>
     </div>`;
     });
     section.querySelector('.activity-rows').innerHTML = rows.join('');
+    // When a year doesn't fit, it scrolls; start on the most recent weeks.
+    section.querySelectorAll('.activity-scroll').forEach((el) => (el.scrollLeft = el.scrollWidth));
     return rows.length;
   };
 
   if (!render()) return;
   section.hidden = false;
-  narrow.addEventListener('change', render);
+  buttons.forEach((b) =>
+    b.addEventListener('click', () => {
+      range = b.dataset.range;
+      render();
+    }),
+  );
 }
