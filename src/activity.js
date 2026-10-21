@@ -31,17 +31,26 @@ export async function initActivity(section) {
     return;
   }
 
-  const rows = SOURCES.filter((s) => data[s.key]?.length).map((s) => {
-    const days = data[s.key].slice(-364);
-    const active = days.filter((d) => d.level > 0).length;
-    return `<div class="activity-row ${s.key}">
+  // Phones get half a year so the squares stay big enough to read.
+  const narrow = matchMedia('(max-width: 560px)');
+  const render = () => {
+    const range = narrow.matches
+      ? { days: 182, text: 'these past 6 months', label: 'the last 6 months' }
+      : { days: 364, text: 'this past year', label: 'the last year' };
+    const rows = SOURCES.filter((s) => data[s.key]?.length).map((s) => {
+      const days = data[s.key].slice(-range.days);
+      const active = days.filter((d) => d.level > 0).length;
+      return `<div class="activity-row ${s.key}">
       <p><a href="${s.href}" target="_blank" rel="noopener noreferrer">${s.icon ?? ''}${s.name}</a>
-        <span class="muted">${active} days ${s.unit} this past year</span></p>
-      <div class="activity-grid" role="img" aria-label="${s.name}: ${active} active days in the last year">${grid(days)}</div>
+        <span class="muted">${active} days ${s.unit} ${range.text}</span></p>
+      <div class="activity-grid" role="img" aria-label="${s.name}: ${active} active days in ${range.label}">${grid(days)}</div>
     </div>`;
-  });
-  if (!rows.length) return;
+    });
+    section.querySelector('.activity-rows').innerHTML = rows.join('');
+    return rows.length;
+  };
 
-  section.querySelector('.activity-rows').innerHTML = rows.join('');
+  if (!render()) return;
   section.hidden = false;
+  narrow.addEventListener('change', render);
 }
