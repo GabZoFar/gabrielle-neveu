@@ -40,6 +40,15 @@ h1 {
   color: var(--ink);
 }
 
+/* Words with a hover preview but no link */
+.bio span[data-preview] {
+  color: var(--ink);
+  text-decoration: underline dotted var(--line-strong);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 4px;
+  cursor: default;
+}
+
 .socials {
   display: flex;
   flex-wrap: wrap;
