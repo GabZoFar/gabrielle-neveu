@@ -115,12 +115,12 @@ ${p.html}
 function indexPage(posts) {
   return shell({
     title: 'Writing · Gabrielle Neveu',
-    description: 'Notes on building products, design, taste and running a small studio.',
+    description: 'Notes on building products, design, taste and running a software company.',
     path: '/blog/',
     body: `      <a class="back" href="/">← Gabrielle Neveu</a>
       <header class="page-head">
         <h1>Writing</h1>
-        <p class="lede">Notes on building products, design, taste and running a small studio.</p>
+        <p class="lede">Notes on building products, design, taste and running a software company.</p>
       </header>
       <div class="rows">
           ${postRows(posts)}
@@ -145,7 +145,7 @@ export function feed(posts) {
   <channel>
     <title>Gabrielle Neveu</title>
     <link>${SITE_URL}/blog/</link>
-    <description>Notes on building products, design, taste and running a small studio.</description>
+    <description>Notes on building products, design, taste and running a software company.</description>
 ${items}
   </channel>
 </rss>
