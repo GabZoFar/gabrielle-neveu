@@ -541,21 +541,24 @@ a.bar {
 
 .candle-tag span {
   position: absolute;
-  bottom: 11px;
+  bottom: 10px;
   font-family: var(--serif);
   font-style: italic;
   font-size: 14px;
   line-height: 1;
   color: var(--ink-soft);
   white-space: nowrap;
+  /* Lets the playhead pass behind the words. */
+  padding: 1px 3px;
+  background: var(--paper);
 }
 
 .candle-tag.right span {
-  left: 12px;
+  left: 9px;
 }
 
 .candle-tag.left span {
-  right: 14px;
+  right: 11px;
 }
 
 .timeline-viewport.dragging,
