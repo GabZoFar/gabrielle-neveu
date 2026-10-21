@@ -31,6 +31,8 @@ const getPeek = () => (shared ??= createPeek());
 // Any element with data-preview="/img.jpg" (and optional data-preview-caption).
 export function initPreviews(root = document) {
   for (const el of root.querySelectorAll('[data-preview]')) {
+    if (el.dataset.previewBound) continue;
+    el.dataset.previewBound = 'true';
     el.addEventListener('pointermove', (e) => {
       if (e.pointerType !== 'mouse') return;
       getPeek().show(el.dataset.preview, el.dataset.previewCaption ?? '', e.clientX, e.clientY);
