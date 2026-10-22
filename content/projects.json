@@ -1,6 +1,6 @@
 [
   {"id": "recolteur", "date": "2024-09-26", "title": "Recolteur", "note": "a harvesting bot for Dofus Retro"},
-  {"id": "madame-reves", "date": "2024-11-16", "title": "Madame Rêves", "note": "dream interpretation, on the web", "preview": "/previews/madame-reves.jpg"},
+  {"id": "madame-reves", "date": "2024-11-16", "title": "Madame Rêves", "note": "dream interpretation, on the web", "url": "https://madamedreams.com", "preview": "/previews/madame-reves.jpg"},
   {"id": "madame-scribe", "date": "2025-02-22", "title": "Madame Scribe", "note": "meeting recorder and summaries for Mac", "url": "https://madamescribe.com", "preview": "/previews/madame-scribe.jpg"},
   {"id": "vapor-locker", "date": "2026-02-04", "title": "Vapor-Locker", "note": "helped build · secrets that evaporate", "url": "https://vapor-locker.com", "preview": "/previews/vapor-locker.jpg"},
   {"id": "kirocast", "date": "2026-02-20", "title": "Kirocast", "note": "the macOS screen recorder built for AI", "url": "https://kirocast.com", "preview": "/previews/kirocast.jpg", "tag": "took a leap!"},
